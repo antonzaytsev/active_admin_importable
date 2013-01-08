@@ -34,6 +34,12 @@ module ActiveAdminImportable
         result = Importer.import extension, active_admin_config.resource_name, params[:import][:file]
 
         flash[:notice] = "Imported #{result[:imported]} #{active_admin_config.resource_name.downcase.send(result[:imported] == 1 ? 'to_s' : 'pluralize')}"
+
+        unless result[:failed] == 0
+          to_notify = ["Failed to import #{result[:failed]} #{active_admin_config.resource_name.downcase.send(result[:failed] == 1 ? 'to_s' : 'pluralize')}", result[:errors]]
+          to_notify.join(' : ')
+          flash[:error] = to_notify
+        end
         redirect_to :back
       end
 

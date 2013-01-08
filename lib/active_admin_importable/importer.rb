@@ -2,7 +2,7 @@ module ActiveAdminImportable
   module Importer
 
     def self.import extension, resource, file
-      result = {imported: 0}
+      result = {imported: 0, failed: 0, errors: [""]}
       resource = resource.constantize
 
       data =
@@ -36,8 +36,17 @@ module ActiveAdminImportable
           row[attribute] = value
         end
 
-        resource.create row
-        result[:imported] += 1
+        new_resource = resource.new(row)
+        if new_resource.valid? && new_resource.save
+          result[:imported] += 1
+        elsif !new_resource.errors.messages.blank?
+          result[:failed] += 1
+          new_resource.errors.messages.each do |k,v|
+            v.each do |em|
+              result[:errors] << em
+            end
+          end
+        end
       end
 
       result
