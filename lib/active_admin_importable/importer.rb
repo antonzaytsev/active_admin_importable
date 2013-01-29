@@ -1,7 +1,6 @@
 module ActiveAdminImportable
   module Importer
-
-    def self.import extension, resource, file
+    def self.import extension, resource, file, options={}
       result = {imported: 0, failed: 0, errors: [""]}
       resource = resource.constantize
 
@@ -33,7 +32,11 @@ module ActiveAdminImportable
             next
           end
 
-          row[attribute] = value
+          if value && [:date, :datetime].include?(resource.columns_hash[attribute].type)
+            row[attribute] = options[:date_format] ? Date.strptime(value, options[:date_format]) : Chronic.parse(value)
+          else
+            row[attribute] = value
+          end
         end
 
         new_resource = resource.new(row)
@@ -43,7 +46,7 @@ module ActiveAdminImportable
           result[:failed] += 1
           new_resource.errors.messages.each do |k,v|
             v.each do |em|
-              result[:errors] << em
+              result[:errors] << k.to_s + ':' + em + ' ' 
             end
           end
         end
