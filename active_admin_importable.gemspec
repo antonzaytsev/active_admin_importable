@@ -15,5 +15,6 @@ Gem::Specification.new do |gem|
   gem.require_paths = ["lib"]
   gem.version       = ActiveAdminImportable::VERSION
 
-  #gem.dependencies = ['activeadmin']
+  gem.add_dependency('simple-spreadsheet')
+  gem.add_dependency('activeadmin')
 end
